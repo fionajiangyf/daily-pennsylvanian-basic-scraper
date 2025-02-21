@@ -20,16 +20,57 @@ def scrape_data_point():
     Returns:
         str: The headline text if found, otherwise an empty string.
     """
-    req = requests.get("https://www.thedp.com")
+    headers = {
+        "User-Agent": "cis3500-scraper"
+    }
+    req = requests.get("https://www.thedp.com", headers=headers)
     loguru.logger.info(f"Request URL: {req.url}")
     loguru.logger.info(f"Request status code: {req.status_code}")
 
     if req.ok:
         soup = bs4.BeautifulSoup(req.text, "html.parser")
-        target_element = soup.find("a", class_="frontpage-link")
-        data_point = "" if target_element is None else target_element.text
-        loguru.logger.info(f"Data point: {data_point}")
-        return data_point
+        sections = {
+        "News": None,
+        "Sports": None,
+        "Opinion": None,
+        }
+        news_section = soup.find("div", class_="col-sm-6 section-news")
+        if news_section:
+            first_news_link = news_section.find("a", class_="frontpage-link medium-link newstop")
+            if first_news_link and first_news_link.get("href"):
+                sections["News"] = first_news_link["href"]
+
+        sports_opinion_section = soup.find("div", class_="col-sm-6")
+        if sports_opinion_section:
+            sports_opinion_divs = soup.find_all("div", class_="col-sm-6")  # Fixed variable name
+            print(sports_opinion_divs)  # Debugging
+
+            for section_div in sports_opinion_divs:
+                section_heading = section_div.find("h3", class_="frontpage-section")
+
+                if section_heading:
+                    section_title = section_heading.text.strip().lower()
+
+                    # Check if it's Sports
+                    if "sports" in section_title:
+                        first_link = section_div.find("div", class_="article-summary").find("a")
+                        print(f"Sports link found: {first_link}")  # Debugging
+                        if first_link and first_link.get("href"):
+                            sections["Sports"] = first_link["href"]
+
+                    # Check if it's Opinion
+                    elif "opinion" in section_title:
+                        first_link = section_div.find("div", class_="article-summary").find("a")
+                        print(f"Opinion link found: {first_link}")  # Debugging
+                        if first_link and first_link.get("href"):
+                            sections["Opinion"] = first_link["href"]
+
+
+
+        for section, link in sections.items():
+            loguru.logger.info(f"{section} Article: {link if link else 'Not Found'}")
+
+        return sections
 
 
 if __name__ == "__main__":
