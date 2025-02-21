@@ -42,7 +42,7 @@ def scrape_data_point():
 
         sports_opinion_section = soup.find("div", class_="col-sm-6")
         if sports_opinion_section:
-            sports_opinion_divs = soup.find_all("div", class_="col-sm-6")  # Fixed variable name
+            sports_opinion_divs = soup.find_all("div", class_="col-sm-6")
             print(sports_opinion_divs)  # Debugging
 
             for section_div in sports_opinion_divs:
@@ -51,17 +51,13 @@ def scrape_data_point():
                 if section_heading:
                     section_title = section_heading.text.strip().lower()
 
-                    # Check if it's Sports
                     if "sports" in section_title:
                         first_link = section_div.find("div", class_="article-summary").find("a")
-                        print(f"Sports link found: {first_link}")  # Debugging
                         if first_link and first_link.get("href"):
                             sections["Sports"] = first_link["href"]
 
-                    # Check if it's Opinion
                     elif "opinion" in section_title:
                         first_link = section_div.find("div", class_="article-summary").find("a")
-                        print(f"Opinion link found: {first_link}")  # Debugging
                         if first_link and first_link.get("href"):
                             sections["Opinion"] = first_link["href"]
 
